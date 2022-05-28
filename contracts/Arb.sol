@@ -55,20 +55,26 @@ contract Arb is Ownable {
     }
 
     function execDualTrade(address _router0, address _router1, address _token0, address _token1, uint _amount) external onlyOwner {
-        uint startBal = IERC20(_token0).balanceOf(address(this));
-        
+        uint token0InitBal = IERC20(_token0).balanceOf(address(this));
+        uint token1InitBal = IERC20(_token1).balanceOf(address(this));
+        swap(_router0, _token0, _token1, _amount);
+        uint token1Bal = IERC20(_token1).balanceOf(address(this));
+        uint tradeAmount = token1Bal - token1InitBal;
+        swap(_router1, _token1, _token0, tradeAmount);
+        uint finalBal = IERC20(_token0).balanceOf(address(this));
+        require(finalBal > token0InitBal, "Not a profitable trade");
     }
 
-    function getBalance(address _token) external view returns (uint) {
-
+    function getBalance(address _token) public view returns (uint) {
+        return IERC20(_token).balanceOf(address(this));
     }
 
     function recoverEth() external onlyOwner {
-
+        payable(msg.sender).transfer(address(this).balance);
     }
     
     function recoverERC20(address _token) external onlyOwner {
-
+        IERC20(_token).transfer(msg.sender, getBalance(_token));
     }
 
     receive() external payable {}
