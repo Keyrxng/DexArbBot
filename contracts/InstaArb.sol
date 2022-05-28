@@ -119,7 +119,7 @@ contract InstaArb is Ownable {
             for(uint x2=0;x2<__stables.length;x2++){
                 for(uint x3=0;x3<__tokens.length;x3++){
                     amountBack = getAmountOutMin(_router, _base, __tokens[x1], _amount);
-                    amountBack = getAmountOutMin(_router, __tokens[x1], stables[x2], amountBack);
+                    amountBack = getAmountOutMin(_router, __tokens[x1], __stables[x2], amountBack);
                     amountBack = getAmountOutMin(_router, __stables[x2], __tokens[x3], amountBack);
                     amountBack = getAmountOutMin(_router, __tokens[x3], _base, amountBack);
                     if(amountBack > _amount) {
@@ -136,9 +136,6 @@ contract InstaArb is Ownable {
 
     function instaTrade(address _router0, address _token0, address _token1, address _token2, address _token3, uint _amount) external onlyOwner {
         uint token0InitBal = IERC20(_token0).balanceOf(address(this));
-        uint token1InitBal = IERC20(_token0).balanceOf(address(this));
-        uint token2InitBal = IERC20(_token0).balanceOf(address(this));
-        uint token3InitBal = IERC20(_token0).balanceOf(address(this));
 
         swap(_router0, _token0, _token1, _amount);
         uint tradeAmount1 = IERC20(_token1).balanceOf(address(this));
