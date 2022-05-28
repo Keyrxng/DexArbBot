@@ -30,19 +30,33 @@ interface IUniswapV2Pair {
 contract Arb is Ownable {
 
     function swap(address _router, address _tokenIn, address _tokenOut, uint _amount) private {
-
+        IERC20(_tokenIn).approve(_router, _amount);
+        address[] memory path;
+        path = new address[](2);
+        path[0] = _tokenIn;
+        path[1] = _tokenOut;
+        uint deadline = block.timestamp + 300;
+        IUniswapV2Router(_router).swapExactTokensForTokens(_amount, 1, path, address(this), deadline);
     }
 
     function getAmountOutMin(address _router, address _tokenIn, address _tokenOut, uint _amount) public view returns (uint) {
-
+        address[] memory path;
+        path = new address[](2);
+        path[0] = _tokenIn;
+        path[1] = _tokenOut;
+        uint[] memory amountOutMins  = IUniswapV2Router(_router).getAmountsOut(_amount, path);
+        return amountOutMins[path.length -1];
     }
 
     function calcDualTrade(address _router0, address _router1, address _token0, address _token1, uint _amount) external view returns (uint) {
-
+        uint amountBack1 = getAmountOutMin(_router0, _token0, _token1, _amount);
+        uint amountBack2 = getAmountOutMin(_router1, _token0, _token1, amountBack1);
+        return amountBack2;
     }
 
     function execDualTrade(address _router0, address _router1, address _token0, address _token1, uint _amount) external onlyOwner {
-
+        uint startBal = IERC20(_token0).balanceOf(address(this));
+        
     }
 
     function getBalance(address _token) external view returns (uint) {
